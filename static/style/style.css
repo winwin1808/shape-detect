@@ -1,0 +1,153 @@
+*{
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
+    font-family: 'Montserrat', sans-serif;
+    /* overflow: hidden; */
+}
+canvas { display:block; }
+
+/* welcome */
+a {
+    position:absolute;
+    text-decoration:none;
+    color:white;
+    font-weight:100;
+    left:50px;
+    bottom:-20px;
+    transition : 0.3s;
+}
+a:hover {
+    font-weight:300;
+}
+  
+body {
+    color: #000;
+    font-family:Raleway;
+    font-weight: 100;
+    font-size:15px;
+
+    font-weight: bold;
+
+    height:100%;
+    width:100%;
+
+    margin:0;
+    overflow:hidden;
+}
+
+
+/* nav */
+.home__header {
+    max-width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 100px;
+    padding: 10px 20px;
+    background-color: #52ACF0;
+    box-shadow: 0 2px 5px rgba(8, 8, 8, 0.3);
+}
+
+.btn__Recognition{
+    background-color: #A8D4F5;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    margin-left: -10px;
+    cursor: pointer;
+}
+
+.btn__Recognition:hover{
+    color: #A8D4F5;
+    background-color: #fff;
+    border: 3px solid #A8D4F5;  
+}
+
+.Draw__tools{
+    display: flex;
+}
+
+.Draw__tools select{
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.btn__clear{
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border: 3px solid transparent;
+}
+
+.btn__clear:hover{
+    background-color: #A8D4F5;
+    border-radius: 5px;
+    border: 1px solid #fff;
+}
+
+.eraser {
+    width: 35px;
+    height: 35px;
+}
+
+.pencil {
+    width: 45px;
+    height: 35px;
+}
+
+.palette{
+    width: 35px;
+    height: 35px;
+}
+
+.line__width,
+.select__color {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 1.6rem;
+    justify-content: space-around;
+    margin-left: 20px;
+}
+
+.line__width i,
+.select__color i {
+    margin-right: 30px;
+}
+
+.line__width{
+    color: rgb(61, 37, 41);
+}
+
+.select__color{
+    color: rgb(192, 109, 0);
+}
+
+
+/* home */
+.home__board{
+    position: relative;
+}
+
+.drawing__board{
+    display: flex;
+    margin-top: 10px;
+    justify-content: center;
+    
+}
+
+.show__result{
+    position: absolute;
+    top: 0;
+    left: 50%;
+}
+

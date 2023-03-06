@@ -1,0 +1,150 @@
+<html>
+<head>
+    <meta name="csrf-token" content="csrf-token">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='./style/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+    <title>Draw Recognition</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='./assets/logo.png') }}">
+    <script type = "text/javascript">
+        
+        var mousePressed = false;
+        var lastX,lastY;
+        var ctx;
+
+        function init(){
+            canvas = document.getElementById("canvas");
+            ctx = canvas.getContext("2d");
+            ctx.fillStyle = "white";
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            
+
+            $('#canvas').mousedown(function(e){
+                mousePressed = true;
+                Draw(e.pageX - $(this).offset().left, e.pageY - $(this).offset().top, false);
+            });
+          
+            $('#canvas').mousemove(function(e){
+                if(mousePressed){
+                    Draw(e.pageX - $(this).offset().left, e.pageY - $(this).offset().top, true);
+                }
+            });
+            $('#canvas').mouseup(function(e){
+                mousePressed = false;
+            });
+            $('#canvas').mouseleave(function(e){
+                mousePressed = false;
+            });
+
+        }
+        
+        function Draw(x,y,isDown){
+            if(isDown){
+                ctx.beginPath();
+                ctx.lineWidth = $("#selWidth").val();
+                ctx.strokeStyle = $("#selColor").val();
+                ctx.lineJoin = "round";
+                ctx.moveTo(lastX,lastY);
+                ctx.lineTo(x,y);
+                ctx.closePath();
+                ctx.stroke();
+            }
+            lastX = x;
+            lastY = y;
+        }
+        function clearCanvas(){
+            ctx.setTransform(1,0,0,1,0,0);
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function postImage(){
+            var img = document.getElementById("canvas").toDataURL("image/png");
+            img = img.replace(/^data:image\/(png|jpg);base64,/,"");
+
+            $.ajax({
+                type: 'POST',
+                url: '/recognize',
+                data: JSON.stringify({image: img}),
+                contentType: 'application/json;charset=UTF-8',
+                dataType: 'json',
+                success: function(msg, status, jqXHR){
+                    var data = JSON.parse(jqXHR.responseText);
+                    var prediction = data.prediction
+                    document.getElementById('result').innerHTML = prediction; 
+
+                    var matrix = data.image_gray
+
+                    const matrixArr = matrix.split("]");
+                    
+                    matrixArr.forEach((arr) => {
+                        console.log(arr)
+                    });
+                    
+                    document.getElementById('matrix').innerHTML = matrix; 
+                
+
+                      
+
+
+                }
+            });
+
+        }
+
+        function clearResult(){
+            document.getElementById('result').innerHTML = "";
+        }
+
+    </script>
+</head>
+<body onload="init()">
+    <div class="container">
+        <div class="home__header">
+            <h1 style="color: white;">Draw Object Recognition</h1>
+            <button id="Recognition" onclick="postImage()" class="btn__Recognition">
+                <i class="fa-solid fa-magnifying-glass"></i> 
+                Recognition
+            </button>
+            <div class="Draw__tools">
+                <button id="Clear" class="btn__clear" onclick="clearCanvas();clearResult();">
+                    <img class="eraser" src="data:image/png;base64,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" alt="eraser">
+                </button>
+                <div class="line__width">
+                    <img class="pencil" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAET0lEQVR4nO2bW4hVVRjHvzWjpmWZgxaWlfQwQfaUdqGHCPGhLFAkSTToCkJRkooV9aAR+SD1IiURFRSSKHST6KK+dINUuqGVpobkBaWUCjUbx18P62z6zvHMWns363LOcH4wcGaf/zr7/19zWGuvb60R6dChQ4cOHTq0GsAoYBJwbm4vyQCGA0uAn/iPM8A24B7A5PYYDWA8sBU3Hw3JbwTQDXzuCV/wTm6/wQEeLhm+4PbcnoMBjAGOVOyAt0PdvyvUBw2CJ0RkfMU2U0PdPOuoCowVkQMiMqpi02PGmJ4QHnJ/A0aKyIj/0e5QKANZO8AYc0hE7hKRgxWbbopgJx/AaOA54GSJAbAP6M3tOQrAZcAbng54MbfPQQGcD3wI7ACajubANOD7JuGPAVVnjNYCeF4FWu3QDQMeAn5T+kUpvQYH6AVOqUCzS7TpAZ4EFgG5Z63BAXygwn/GUF7dNQJMV+H7gSm5PSUDu87/QXXAyx79DcAuYBNwXiqf0QAWlh3Ja521Q+lnpPQaHGAccFQFesyjf1Rp/wDGpfIaBeAlFehHYLhD29Mw7S1O6TU4wNXYR9eC2zz61Ur7M3BOKq9RAD5WgTZ4tJMbOqu9qz7AbBXmFHCVR/+J0m9M5TMKwAjsNFaw0qO/U2n7gMmpvEYB++hacBgY49COBPYq/QspvQYHuBg7fRU86NE/rbS/A0FKXdkAXleBvga6HdpLgb+UfkFKr8EBrsU+5xfc7NG/qbTbgWGpvAYHMMCnKtBbHv2N2H2/gltSeY0CMF+FOQFc4dAa4CulX5fSa3CwW9n7VKBlHv29SnsSmJTKaxSA5SrQrziWsNgK8AGlfyal1+AAE4HjKtBcj36F0u53dVZbAKxVgb7AUeYCrqS+9j8/pdfgADepkbwfuM6jf1eF/9LVWS0P0AVsUYFe8einKW0/cH0qr1EAHlCB/gQmOLTd1G90vJbSa3CwuzsHVaAlHv0jZTurLaB+2tuNo3IDjKW+zPV4Sq/Bwdbt9Gpvpke/qmxntQXAUyrQFtdIztllrlkpvUYB2Fnhr79Radu7zCUiAkxVgQ7jWL4Cs5S2D7gmpdcoAEtVqAEPKgAXUL84WpXSZzSADSrUHIfuVaU7QruXuQqAX1SwiQNoFlCPc3HUNmCf5v6phfq72egP3KE0AOtzeI0CcIkKtrfJ+3OoP/3xLTA6h9coYOf0gm3qejfwLPXF0H3A5Tn9Bge79C3YXLvWiz3qotk55MKLiAAzVMj3sf/ZcaIh/GbgotxeowDMU0H7G4L3YRdIA26CtCpVNiIuVK/1cbXtInK/MWZrYwPskdaZEvZM8hkRec8Ys6vhXl0iMq/26xpjDAHvedaGJ9jpbjkw4GlvYA9x2N3kXner90vXGqt8A/ao19+IyH3GmO8qtG9JSneAMWYd9uGnS0TWG2NOl2h2q4jMFZGQpe/jIrK2yfU1IkLtx7ktp/kXiF6cOJtO4AcAAAAASUVORK5CYII=">
+                    <select id = "selWidth">
+                        <option value = "7" selected = "selected">7</option>
+                        <option value = "15">15</option>
+                        <option value = "20">20</option>
+                        <option value = "25">25</option>
+                    </select>
+                </div>
+                <div class="select__color">
+                    <img class="palette" src="data:image/png;base64,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">
+                    <select id = "selColor">
+                        <option value = "black" selected = "selected">black</option>
+                        <option value = "red">red</option>
+                        <option value = "blue">blue</option>
+                        <option value = "green">green</option>
+                        <option value = "yellow">yellow</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="home__board">
+            <!-- <h3 style ="margin-left: 45px;margin-top: 30px">Draw an Object</h3> -->
+            <div class="drawing__board" >
+                <canvas id = "canvas" width="280" height="280" style="border:2px solid black; margin:5%"></canvas>
+            </div>
+
+            <div class="show__result">  
+                <h4 style = "margin-top: 10px;">Result:</span></h4>    
+                <div id = "result" style = "margin-top: 10px; font-weight: bold; font-size: 1.2em; text-transform: uppercase;"></div>
+            </div>
+            
+        </div>
+    </div>
+</body>
+</html>
